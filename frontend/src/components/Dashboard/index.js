@@ -14,7 +14,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   useEffect(() => {
     // Obtener empleados desde el backend con Axios
-    axios.get('http://34.173.165.179:5002/employees')  // <-- Cambio aquí
+    axios.get('/employee/employees')  // <-- Cambio aquí
       .then(response => {
         if (Array.isArray(response.data)) {
           setEmployees(response.data);
@@ -53,7 +53,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       cancelButtonText: 'No, cancel!',
     }).then(result => {
       if (result.isConfirmed) {
-        axios.delete(`http://34.173.165.179:5000/employees/${id}`)
+        axios.delete(`/employee/employees/${id}`)
           .then(response => {
             if (response.data.error) {
               throw new Error(response.data.error);

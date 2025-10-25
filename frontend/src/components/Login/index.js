@@ -9,7 +9,7 @@ const Login = ({ setIsAuthenticated }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://35.226.133.145:5001/login", {
+      const res = await axios.post("/auth/login", {
         email,
         password,
       });
