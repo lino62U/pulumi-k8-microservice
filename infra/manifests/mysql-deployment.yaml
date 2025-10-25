@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "123456"
+            - name: MYSQL_DATABASE
+              value: "myapp_db"
+            - name: MYSQL_USER
+              value: "myapp_user"
+            - name: MYSQL_PASSWORD
+              value: "mypassword"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+            - mountPath: /docker-entrypoint-initdb.d/init.sql
+              name: mysql-init-volume
+              subPath: init.sql # El nombre de la key dentro del ConfigMap
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-init-volume
+          configMap:
+            name: mysql-init-config # Nombre que usaste en `kubectl create configmap`
+            items:
+              - key: init.sql
+                path: init.sql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  clusterIP: None   # Headless service para que los microservicios puedan conectar

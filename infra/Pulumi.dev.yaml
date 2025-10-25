@@ -1,0 +1,4 @@
+config:
+  gcp:project: k8-clusters-474002
+  gcp:zone: us-central1-a
+  infra:clusterName: pulumi-gke-cluster
