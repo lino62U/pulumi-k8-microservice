@@ -125,7 +125,7 @@ for fpath in files:
 # ==== Función para fusionar kubeconfig en ~/.kube/config (sin export manual) ==========
 # =====================================================================================
 
-def merge_kubeconfig(new_config_content):
+def merge_kubeconfig(new_config_content, cluster_name="pulumi-gke-cluster"):
     kube_dir = Path.home() / ".kube"
     kube_dir.mkdir(parents=True, exist_ok=True)
     default_path = kube_dir / "config"
@@ -136,22 +136,24 @@ def merge_kubeconfig(new_config_content):
         f.write(new_config_content)
 
     if default_path.exists():
-        # Fusiona la configuración nueva con la existente
-        subprocess.run([
-            "kubectl", "config", "view", "--flatten", "--merge",
-            "--kubeconfig", f"{default_path}:{temp_path}"
-        ], stdout=open(default_path, "w"), check=True)
+        # Fusionar la configuración nueva con la existente usando $KUBECONFIG
+        merged_output = subprocess.run(
+            ["kubectl", "config", "view", "--flatten"],
+            env={**dict(**{"KUBECONFIG": f"{default_path}:{temp_path}"})},
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        # Guardar el resultado fusionado en ~/.kube/config
+        with open(default_path, "w") as f:
+            f.write(merged_output.stdout)
         temp_path.unlink()
         print("✅ Contexto GKE fusionado automáticamente con ~/.kube/config")
     else:
         temp_path.rename(default_path)
         print("✅ Se creó un nuevo archivo ~/.kube/config para el clúster GKE")
 
-# ==== Aplicar automáticamente el merge del kubeconfig ====
-def merge_and_set_context(content):
-    merge_kubeconfig(content)
-
-    # Intentar activar automáticamente el contexto del cluster
+    # Cambiar contexto automáticamente
     try:
         subprocess.run(
             ["kubectl", "config", "use-context", cluster_name],
@@ -164,6 +166,12 @@ def merge_and_set_context(content):
     except subprocess.CalledProcessError as e:
         print("⚠️ Advertencia: No se pudo cambiar automáticamente el contexto.")
         print(e.stderr)
+
+
+# ==== Aplicar automáticamente el merge del kubeconfig ====
+def merge_and_set_context(content):
+    merge_kubeconfig(content, cluster_name="pulumi-gke-cluster")
+
 
 kubeconfig.apply(merge_and_set_context)
 
