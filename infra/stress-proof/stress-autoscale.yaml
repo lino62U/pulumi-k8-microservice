@@ -1,0 +1,26 @@
+# infra/stress-proof/stress-autoscale.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-autoscale
+spec:
+  replicas: 10   # empieza con 10 pods
+  selector:
+    matchLabels:
+      app: stress-autoscale
+  template:
+    metadata:
+      labels:
+        app: stress-autoscale
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c", "while true; do echo hello; sleep 30; done"]
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
