@@ -1,69 +1,20 @@
-<h1 align="center">
-  <a href="https://safdarjamal.github.io/crud-app/">
-    CRUD App
-  </a>
-</h1>
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-<p align="center">
-  <a href="https://github.com/SafdarJamal/crud-app/actions?query=workflow%3A%22Node.js+CI%22">
-    <img src="https://github.com/SafdarJamal/crud-app/workflows/Node.js%20CI/badge.svg" alt="Node.js CI" />
-  </a>
-  <a href="https://github.com/SafdarJamal/crud-app/releases">
-    <img src="https://img.shields.io/github/v/release/SafdarJamal/crud-app" alt="GitHub Release (latest by date)" />
-  </a>
-  <a href="https://github.com/SafdarJamal/crud-app/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/SafdarJamal/crud-app" alt="License" />
-  </a>
-</p>
+# Run and deploy your AI Studio app
 
-<p align="center">
-  A simple and beautiful <a href="https://www.codecademy.com/articles/what-is-crud">CRUD</a> application built with <a href="https://reactjs.org">React</a>.
-</p>
+This contains everything you need to run your app locally.
 
-![crud-app](https://user-images.githubusercontent.com/48409548/94567114-8aa5ea80-0284-11eb-99f6-87401b099848.png)
+View your app in AI Studio: https://ai.studio/apps/drive/10_lYDrzuyiCcKfacLvLklAAa7iZA-uON
 
-## Technologies Used
+## Run Locally
 
-- [React](http://reactjs.org)
-- [Primitive UI](https://taniarascia.github.io/primitive)
-- [SweetAlert2](https://sweetalert2.github.io)
+**Prerequisites:**  Node.js
 
-## Development
 
-To get a local copy of the code, clone it using git:
-
-```
-git clone https://github.com/SafdarJamal/crud-app.git
-cd crud-app
-```
-
-Install dependencies:
-
-```
-npm install
-```
-
-Now, you can start a local web server by running:
-
-```
-npm start
-```
-
-and then you can open http://localhost:3000 to view it in the browser.
-
-#### Available Scripts
-
-| Script        | Description                                                             |
-| ------------- | ----------------------------------------------------------------------- |
-| npm start     | Runs the app in the development mode.                                   |
-| npm test      | Launches the test runner in the interactive watch mode.                 |
-| npm run build | Builds the app for production to the `build` folder.                    |
-| npm run eject | This command will remove the single build dependency from your project. |
-
-## Credits
-
-CRUD App is built and maintained by [Safdar Jamal](https://safdarjamal.github.io).
-
-## License
-
-CRUD App is open-source software licensed under the [MIT License](https://github.com/SafdarJamal/crud-app/blob/master/LICENSE).
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

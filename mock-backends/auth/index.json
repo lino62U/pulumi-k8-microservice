@@ -1,0 +1,10 @@
+{
+    "id": "admin-test-01",
+    "name": "Docker Test User",
+    "email": "admins@adv.com",
+    "avatarUrl": "https://picsum.photos/id/237/200/200",
+    "role": "Admindsd",
+    "department": "Docker" ,
+    "pass": "password"
+    
+  }
