@@ -19,7 +19,8 @@ def add_user():
     data = request.json
     name = data.get("name")
     email = data.get("email")
-    password = data.get("password")
+    password = data.get("password") or data.get("pass")
+
 
     if not all([name, email, password]):
         return jsonify({"error": "Missing fields"}), 400
@@ -43,7 +44,8 @@ def add_user():
 def login():
     data = request.json
     email = data.get("email")
-    password = data.get("password")
+    password = data.get("password") or data.get("pass")
+
 
     if not all([email, password]):
         return jsonify({"error": "Email and password are required"}), 400

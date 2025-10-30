@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: gcr.io/k8-clusters-474002/frontend:1.15  # Tu imagen nginx actual
+          image: gcr.io/k8-clusters-474002/frontend:1.18  # Tu imagen nginx actual
           ports:
             - containerPort: 80  # <-- Cambio: coincide con nginx
 ---
