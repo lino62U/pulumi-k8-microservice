@@ -21,7 +21,10 @@ cluster = container.Cluster(
     location=zone,
     deletion_protection=False,
     remove_default_node_pool=True,
-    initial_node_count=1
+    initial_node_count=1,
+    vertical_pod_autoscaling=container.ClusterVerticalPodAutoscalingArgs(
+        enabled=True  # 👈 habilita el VPA
+    )
 )
 
 # ==== Crear Node Pool autoscalable ====

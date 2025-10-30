@@ -1,0 +1,102 @@
+# =======================================
+# VPA para mscv-auth
+# =======================================
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-mscv-auth
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mscv-auth
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 1000m
+          memory: 1Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# =======================================
+# VPA para mscv-employee
+# =======================================
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-mscv-employee
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mscv-employee
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 150m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 1500m
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# =======================================
+# VPA para mscv-stress
+# =======================================
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-mscv-stress
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mscv-stress
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 200m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 2000m
+          memory: 3Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# =======================================
+# VPA para frontend
+# =======================================
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-frontend
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 1000m
+          memory: 1Gi
+        controlledResources: ["cpu", "memory"]
