@@ -15,25 +15,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Autenticación con Google Cloud
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      # ✅ Instalar Google Cloud SDK (método oficial CI/CD)
+      - name: Instalar Google Cloud SDK
+        run: |
+          curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+          tar -xzf google-cloud-cli-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${{ github.workspace }}/google-cloud-sdk/bin" >> $GITHUB_PATH
 
+      # Instalar plugin GKE Auth
       - name: Instalar plugin GKE auth
         run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg >/dev/null
-          sudo apt-get update -y
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+          ./google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin --quiet
 
+      # Configurar Python y dependencias
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - run: pip install -r infra/requirements.txt
 
+      # Pulumi Preview
       - name: Pulumi Preview
         uses: pulumi/actions@v5
         with:
@@ -54,25 +61,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Autenticación con Google Cloud
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      # ✅ Instalar Google Cloud SDK (método oficial CI/CD)
+      - name: Instalar Google Cloud SDK
+        run: |
+          curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+          tar -xzf google-cloud-cli-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${{ github.workspace }}/google-cloud-sdk/bin" >> $GITHUB_PATH
 
+      # Instalar plugin GKE Auth
       - name: Instalar plugin GKE auth
         run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg >/dev/null
-          sudo apt-get update -y
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+          ./google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin --quiet
 
+      # Configurar Python y dependencias
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - run: pip install -r infra/requirements.txt
 
+      # Pulumi Deploy
       - name: Pulumi Deploy
         uses: pulumi/actions@v5
         with:
