@@ -7,35 +7,25 @@ on:
     branches: [main]
 
 jobs:
-  # ------------------------------
-  # JOB 1: Pulumi Preview (Pull Request)
-  # ------------------------------
   preview:
     if: github.event_name == 'pull_request'
     name: "Preview (PR)"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Autenticar en Google Cloud
-        uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: Instalar gcloud CLI (incluye auth plugin para GKE)
-        uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configurar Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Instalar dependencias
-        run: pip install -r infra/requirements.txt
+      - run: pip install -r infra/requirements.txt
 
       - name: Pulumi Preview
         uses: pulumi/actions@v5
@@ -49,42 +39,27 @@ jobs:
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
-
-  # ------------------------------
-  # JOB 2: Pulumi Deploy (Merge a main)
-  # ------------------------------
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: "Deploy (Main)"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Autenticar en Google Cloud
-        uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: Instalar gcloud CLI (incluye auth plugin para GKE)
-        uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configurar Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Instalar dependencias
-        run: pip install -r infra/requirements.txt
+      - run: pip install -r infra/requirements.txt
 
-      # ------------------------------
-      # Pulumi Deploy con reintentos
-      # ------------------------------
-      - name: Pulumi Deploy (con auto-aprobación y retry)
-        id: pulumi-deploy
+      - name: Pulumi Deploy
         uses: pulumi/actions@v5
         with:
           command: up
@@ -96,7 +71,3 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-        # --- NUEVO BLOQUE DE REINTENTOS ---
-        retry:
-          max-attempts: 3        # Intentará hasta 3 veces
-          delay-seconds: 45      # Espera 45 segundos entre cada intento
