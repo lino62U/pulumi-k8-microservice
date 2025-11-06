@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     
     // Lee la variable de entorno del proceso de build (pasada por Docker)
-    const geminiApiKey = process.env.GEMINI_API_KEY;
+    // const geminiApiKey = process.env.GEMINI_API_KEY; // <--- ELIMINADO
 
     return {
       server: {
@@ -15,8 +15,8 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         // Inyecta la clave en tu código
-        'process.env.API_KEY': JSON.stringify(geminiApiKey),
-        'process.env.GEMINI_API_KEY': JSON.stringify(geminiApiKey)
+        // 'process.env.API_KEY': JSON.stringify(geminiApiKey), // <--- ELIMINADO
+        // 'process.env.GEMINI_API_KEY': JSON.stringify(geminiApiKey) // <--- ELIMINADO
       },
       resolve: {
         alias: {
