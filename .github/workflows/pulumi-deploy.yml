@@ -90,10 +90,10 @@ jobs:
       - name: Pulumi Deploy
         uses: pulumi/actions@v5
         with:
-          command: up --yes --skip-preview
+          command: up
+          args: --yes --skip-preview --refresh
           stack-name: dev
           work-dir: infra
-          refresh: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
