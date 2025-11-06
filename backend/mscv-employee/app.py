@@ -14,6 +14,7 @@ def get_db_connection():
         database=os.environ.get("DB_NAME", "myapp_db")
     )
 
+# trigger build
 @app.route('/employees', methods=['GET'])
 def get_employees():
     try:

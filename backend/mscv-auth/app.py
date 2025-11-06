@@ -40,6 +40,7 @@ def add_user():
     finally:
         conn.close()
 
+# trigger build
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
