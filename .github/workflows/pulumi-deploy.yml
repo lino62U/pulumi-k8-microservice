@@ -32,17 +32,23 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: 3. Configurar Python 3.11
+      # --- ¡PASO AÑADIDO PARA CORREGIR EL ERROR! ---
+      # Instala gcloud CLI, que incluye el gke-gcloud-auth-plugin
+      - name: 3. Instalar gcloud CLI (incluye el auth plugin)
+        uses: 'google-github-actions/setup-gcloud@v2'
+      # --- FIN DEL PASO AÑADIDO ---
+
+      - name: 4. Configurar Python 3.11 # (Ahora es el paso 4)
         uses: actions/setup-python@v5
         with:
           python-version: '3.11' 
 
-      - name: 4. Instalar dependencias de Python
+      - name: 5. Instalar dependencias de Python # (Ahora es el paso 5)
         # Asume que tu código de Pulumi está en una carpeta 'infra'
         # y que tienes un 'requirements.txt' allí.
         run: pip install -r infra/requirements.txt
       
-      - name: 5. Ejecutar 'pulumi preview'
+      - name: 6. Ejecutar 'pulumi preview' # (Ahora es el paso 6)
         uses: pulumi/actions@v5
         with:
           command: preview
@@ -72,15 +78,21 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: 3. Configurar Python 3.11
+      # --- ¡PASO AÑADIDO PARA CORREGIR EL ERROR! ---
+      # Instala gcloud CLI, que incluye el gke-gcloud-auth-plugin
+      - name: 3. Instalar gcloud CLI (incluye el auth plugin)
+        uses: 'google-github-actions/setup-gcloud@v2'
+      # --- FIN DEL PASO AÑADIDO ---
+
+      - name: 4. Configurar Python 3.11 # (Ahora es el paso 4)
         uses: actions/setup-python@v5
         with:
           python-version: '3.11' 
 
-      - name: 4. Instalar dependencias de Python
+      - name: 5. Instalar dependencias de Python # (Ahora es el paso 5)
         run: pip install -r infra/requirements.txt
 
-      - name: 5. Ejecutar 'pulumi up' (con auto-aprobación)
+      - name: 6. Ejecutar 'pulumi up' (con auto-aprobación) # (Ahora es el paso 6)
         uses: pulumi/actions@v5
         with:
           command: up
