@@ -1,105 +1,102 @@
-# Nombre del workflow que aparecerá en la pestaña "Actions" de GitHub
 name: Desplegar Pulumi a GKE
 
-# Disparadores: Cuándo debe ejecutarse este pipeline
 on:
-  # 1. En Pull Requests que apunten a la rama 'main'
   pull_request:
-    branches:
-      - main
-  
-  # 2. En pushes (como un merge) directos a la rama 'main'
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  # ----- TRABAJO 1: PREVISUALIZAR CAMBIOS (en Pull Requests) -----
+  # ------------------------------
+  # JOB 1: Pulumi Preview (Pull Request)
+  # ------------------------------
   preview:
-    # Solo se ejecuta si el evento es un 'pull_request'
     if: github.event_name == 'pull_request'
     name: "Preview (PR)"
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 1. Checkout del código
+      - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Asegura que lea todos los archivos (para tu init.sql)
+          fetch-depth: 0
 
-      - name: 2. Autenticar a Google Cloud
-        uses: 'google-github-actions/auth@v2'
+      - name: Autenticar en Google Cloud
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      # --- ¡PASO AÑADIDO PARA CORREGIR EL ERROR! ---
-      # Instala gcloud CLI, que incluye el gke-gcloud-auth-plugin
-      - name: 3. Instalar gcloud CLI (incluye el auth plugin)
-        uses: 'google-github-actions/setup-gcloud@v2'
-      # --- FIN DEL PASO AÑADIDO ---
+      - name: Instalar gcloud CLI (incluye auth plugin para GKE)
+        uses: google-github-actions/setup-gcloud@v2
 
-      - name: 4. Configurar Python 3.11 # (Ahora es el paso 4)
+      - name: Configurar Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
 
-      - name: 5. Instalar dependencias de Python # (Ahora es el paso 5)
-        # Asume que tu código de Pulumi está en una carpeta 'infra'
-        # y que tienes un 'requirements.txt' allí.
+      - name: Instalar dependencias
         run: pip install -r infra/requirements.txt
-      
-      - name: 6. Ejecutar 'pulumi preview' # (Ahora es el paso 6)
+
+      - name: Pulumi Preview
         uses: pulumi/actions@v5
         with:
           command: preview
-          stack-name: dev # <-- CAMBIA ESTO por tu nombre de stack (ej. 'prod')
-          work-dir: infra   # <-- CAMBIA ESTO por la carpeta de tu código Pulumi
-          comment-on-pr: true # ¡Publica un comentario en el PR con el preview!
+          stack-name: dev
+          work-dir: infra
+          comment-on-pr: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
-  # ----- TRABAJO 2: DESPLEGAR CAMBIOS (en Merge a 'main') -----
+
+  # ------------------------------
+  # JOB 2: Pulumi Deploy (Merge a main)
+  # ------------------------------
   deploy:
-    # Solo se ejecuta si el evento es un 'push' a 'main'
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: "Deploy (Main)"
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 1. Checkout del código
+      - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
-      - name: 2. Autenticar a Google Cloud
-        uses: 'google-github-actions/auth@v2'
+      - name: Autenticar en Google Cloud
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      # --- ¡PASO AÑADIDO PARA CORREGIR EL ERROR! ---
-      # Instala gcloud CLI, que incluye el gke-gcloud-auth-plugin
-      - name: 3. Instalar gcloud CLI (incluye el auth plugin)
-        uses: 'google-github-actions/setup-gcloud@v2'
-      # --- FIN DEL PASO AÑADIDO ---
+      - name: Instalar gcloud CLI (incluye auth plugin para GKE)
+        uses: google-github-actions/setup-gcloud@v2
 
-      - name: 4. Configurar Python 3.11 # (Ahora es el paso 4)
+      - name: Configurar Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
 
-      - name: 5. Instalar dependencias de Python # (Ahora es el paso 5)
+      - name: Instalar dependencias
         run: pip install -r infra/requirements.txt
 
-      - name: 6. Ejecutar 'pulumi up' (con auto-aprobación) # (Ahora es el paso 6)
+      # ------------------------------
+      # Pulumi Deploy con reintentos
+      # ------------------------------
+      - name: Pulumi Deploy (con auto-aprobación y retry)
+        id: pulumi-deploy
         uses: pulumi/actions@v5
         with:
-          command: up --yes --skip-preview
-          stack-name: dev  # <-- CAMBIA ESTO por tu nombre de stack
-          work-dir: infra    # <-- CAMBIA ESTO por la carpeta de tu código Pulumi
-          refresh: true      # Refresca el estado antes de aplicar
+          command: up
+          stack-name: dev
+          work-dir: infra
+          refresh: true
+          options: --yes --skip-preview
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+        # --- NUEVO BLOQUE DE REINTENTOS ---
+        retry:
+          max-attempts: 3        # Intentará hasta 3 veces
+          delay-seconds: 45      # Espera 45 segundos entre cada intento
