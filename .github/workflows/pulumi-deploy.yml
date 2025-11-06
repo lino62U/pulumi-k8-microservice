@@ -1,0 +1,95 @@
+# Nombre del workflow que aparecerá en la pestaña "Actions" de GitHub
+name: Desplegar Pulumi a GKE
+
+# Disparadores: Cuándo debe ejecutarse este pipeline
+on:
+  # 1. En Pull Requests que apunten a la rama 'main'
+  pull_request:
+    branches:
+      - main
+  
+  # 2. En pushes (como un merge) directos a la rama 'main'
+  push:
+    branches:
+      - main
+
+jobs:
+  # ----- TRABAJO 1: PREVISUALIZAR CAMBIOS (en Pull Requests) -----
+  preview:
+    # Solo se ejecuta si el evento es un 'pull_request'
+    if: github.event_name == 'pull_request'
+    name: "Preview (PR)"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Asegura que lea todos los archivos (para tu init.sql)
+
+      - name: 2. Autenticar a Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
+
+      - name: 3. Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+
+      - name: 4. Instalar dependencias de Python
+        # Asume que tu código de Pulumi está en una carpeta 'infra'
+        # y que tienes un 'requirements.txt' allí.
+        run: pip install -r infra/requirements.txt
+      
+      - name: 5. Ejecutar 'pulumi preview'
+        uses: pulumi/actions@v5
+        with:
+          command: preview
+          stack-name: dev # <-- CAMBIA ESTO por tu nombre de stack (ej. 'prod')
+          work-dir: infra   # <-- CAMBIA ESTO por la carpeta de tu código Pulumi
+          comment-on-pr: true # ¡Publica un comentario en el PR con el preview!
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+  # ----- TRABAJO 2: DESPLEGAR CAMBIOS (en Merge a 'main') -----
+  deploy:
+    # Solo se ejecuta si el evento es un 'push' a 'main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: "Deploy (Main)"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: 2. Autenticar a Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
+
+      - name: 3. Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+
+      - name: 4. Instalar dependencias de Python
+        run: pip install -r infra/requirements.txt
+
+      - name: 5. Ejecutar 'pulumi up' (con auto-aprobación)
+        uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: dev  # <-- CAMBIA ESTO por tu nombre de stack
+          work-dir: infra    # <-- CAMBIA ESTO por la carpeta de tu código Pulumi
+          refresh: true      # Refresca el estado antes de aplicar
+          # '--yes' es CRÍTICO para que no pida confirmación en el pipeline
+          args: --yes 
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
