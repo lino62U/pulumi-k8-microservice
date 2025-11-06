@@ -21,6 +21,10 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Instalar plugin GKE auth
+        run: |
+          sudo apt-get update && sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -53,6 +57,10 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Instalar plugin GKE auth
+        run: |
+          sudo apt-get update && sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -62,11 +70,10 @@ jobs:
       - name: Pulumi Deploy
         uses: pulumi/actions@v5
         with:
-          command: up
+          command: up --yes --skip-preview
           stack-name: dev
           work-dir: infra
           refresh: true
-          options: --yes --skip-preview
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
