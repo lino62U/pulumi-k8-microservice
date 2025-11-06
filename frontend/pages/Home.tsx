@@ -7,7 +7,7 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white">
       <header className="p-4 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Ad-Vantage HRMS Proof</h1>
+        <h1 className="text-3xl font-bold">Ad-Vantage HRMS</h1>
         <Link to="/login" className="bg-white text-blue-900 font-bold py-2 px-6 rounded-full hover:bg-gray-200 transition duration-300">
           Admin Login
         </Link>

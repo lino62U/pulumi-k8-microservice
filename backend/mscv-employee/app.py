@@ -15,7 +15,6 @@ def get_db_connection():
     )
 # trigger build
 
-# trigger build
 @app.route('/employees', methods=['GET'])
 def get_employees():
     try:

@@ -42,7 +42,6 @@ def add_user():
 
 # trigger build
 
-# trigger build
 
 @app.route("/login", methods=["POST"])
 def login():
