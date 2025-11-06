@@ -53,35 +53,50 @@ class MicroserviceDeployer:
     def deploy(self):
         # 1. Deployment
         self.deployment = Deployment(
-# ... (código sin cambios) ...
             f"{self.name}-deployment",
-            spec={
-                "selector": {"matchLabels": self.labels},
-                "replicas": 2, # HPA tomará control de esto
-                "template": {
-                    "metadata": {"labels": self.labels},
-                    "spec": {
-                        "containers": [{
-                            "name": self.name,
-                            "image": self.image,
-                            "ports": [{"containerPort": self.port}],
-                            "env": self.env,
-                            "resources": self.resources, # Se aplica si se define
-                        }]
-                    }
+            {
+                "metadata": {
+                    "name": self.name,   # ✅ EXACTO: mscv-auth
+                    "labels": self.labels
                 },
+                "spec": {
+                    "replicas": 2,
+                    "selector": {
+                        "matchLabels": self.labels
+                    },
+                    "template": {
+                        "metadata": {
+                            "labels": self.labels
+                        },
+                        "spec": {
+                            "containers": [{
+                                "name": self.name,
+                                "image": self.image,
+                                "ports": [{"containerPort": self.port}],
+                                "env": self.env
+                            }]
+                        }
+                    }
+                }
             },
             opts=ResourceOptions(provider=self.provider)
         )
 
         # 2. Service (LoadBalancer)
         self.service = Service(
-# ... (código sin cambios) ...
             f"{self.name}-service",
-            spec={
-                "selector": self.labels,
-                "ports": [{"port": self.port, "targetPort": self.port}],
-                "type": "LoadBalancer"
+            {
+                "metadata": {
+                    "name": self.name  # ✅ EXACTO: mscv-auth
+                },
+                "spec": {
+                    "selector": self.labels,
+                    "ports": [{
+                        "port": self.port,
+                        "targetPort": self.port
+                    }],
+                    "type": "LoadBalancer"
+                }
             },
             opts=ResourceOptions(provider=self.provider, depends_on=[self.deployment])
         )
