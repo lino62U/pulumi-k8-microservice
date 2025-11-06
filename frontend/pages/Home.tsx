@@ -14,7 +14,7 @@ const Home: React.FC = () => {
       </header>
       <main className="flex flex-col items-center justify-center text-center px-4" style={{ height: 'calc(100vh - 70px)'}}>
         <h2 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
-          Empowering Your Agency's<br />Greatest Asset: Your People
+          Empowering Your Agency's  ...<br />Greatest Asset: Your People
         </h2>
         <p className="text-lg md:text-xl text-gray-300 max-w-3xl mb-8">
           Ad-Vantage is the all-in-one HR platform designed for the fast-paced world of advertising. 

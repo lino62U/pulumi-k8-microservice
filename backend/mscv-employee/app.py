@@ -6,6 +6,9 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# trigger build
+
+
 def get_db_connection():
     return mysql.connector.connect(
         host=os.environ.get("DB_HOST", "mysql"),
