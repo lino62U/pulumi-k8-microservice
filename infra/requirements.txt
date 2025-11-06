@@ -10,7 +10,7 @@ parver==0.5
 protobuf==5.29.5
 pulumi==3.204.0
 pulumi_gcp==9.3.0
-pulumi_kubernetes==4.23.0
+pulumi_kubernetes==4.24.0
 PyYAML==6.0.3
 requests==2.32.5
 semver==3.0.4
