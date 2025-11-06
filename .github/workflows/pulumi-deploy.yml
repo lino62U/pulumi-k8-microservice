@@ -15,10 +15,9 @@ jobs:
   pulumi-preview:
     name: CI - Pulumi Preview (PR)
     runs-on: ubuntu-latest
-    # 'needs: setup-environment' eliminado. Este job ahora se auto-configura.
     if: github.event_name == 'pull_request'
     
-    permissions: # <--- AÑADIDO: Necesario para que GCloud auth funcione
+    permissions:
       contents: 'read'
       id-token: 'write'
 
@@ -26,7 +25,7 @@ jobs:
       - name: Checkout Código
         uses: actions/checkout@v4
 
-      # --- INICIO: Setup de Entorno (copiado de 'setup-environment') ---
+      # --- INICIO: Setup de Entorno ---
       - name: Google Cloud Auth
         uses: google-github-actions/auth@v2
         with:
@@ -35,7 +34,7 @@ jobs:
       - name: Instalar Google Cloud SDK y Plugin GKE
         uses: google-github-actions/setup-gcloud@v2
         with:
-          components: gke-gcloud-auth-plugin # Instala el plugin automáticamente
+          components: gke-gcloud-auth-plugin
       
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -59,6 +58,8 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          # --- ¡LA CORRECCIÓN! ---
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
   # ===============================================
   # JOB CD: BUILD Y DEPLOY GENÉRICO
@@ -69,15 +70,15 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: 'read'
-      id-token: 'write' # Mantenido para GCloud Auth
+      id-token: 'write'
 
     steps:
       - name: Checkout Código (Fetch completo para diff)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Necesario para diff
+          fetch-depth: 0
 
-      # --- INICIO: Setup de Entorno (AÑADIDO) ---
+      # --- INICIO: Setup de Entorno ---
       - name: Google Cloud Auth
         uses: google-github-actions/auth@v2
         with:
@@ -106,7 +107,7 @@ jobs:
         id: changed_files
         uses: tj-actions/changed-files@v44
         with:
-          files_output: 'all' # Queremos la lista completa
+          files_output: 'all'
 
       - name: Ejecutar Build Manager
         if: steps.changed_files.outputs.all_changed_files != ''
@@ -119,6 +120,8 @@ jobs:
           PULUMI_STACK: dev
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          # --- ¡LA CORRECCIÓN! ---
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
       - name: Pulumi Deploy
         uses: pulumi/actions@v5
@@ -131,3 +134,5 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          # --- ¡LA CORRECCIÓN! ---
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
