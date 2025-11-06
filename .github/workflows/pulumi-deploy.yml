@@ -25,16 +25,24 @@ jobs:
       - name: Checkout Código
         uses: actions/checkout@v4
 
-      # --- INICIO: Setup de Entorno ---
+      # --- INICIO: Setup de Entorno (Manual y Robusto) ---
       - name: Google Cloud Auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: Instalar Google Cloud SDK y Plugin GKE
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          components: gke-gcloud-auth-plugin
+      # --- ¡LA CORRECCIÓN! (Reemplazando setup-gcloud@v2) ---
+      - name: Instalar Google Cloud SDK
+        run: |
+          curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+          tar -xzf google-cloud-cli-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${GITHUB_WORKSPACE}/google-cloud-sdk/bin" >> $GITHUB_PATH
+
+      - name: Instalar plugin GKE auth
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+      # --- Fin de la corrección ---
       
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -58,7 +66,6 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-          # --- ¡LA CORRECCIÓN! ---
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
   # ===============================================
@@ -78,16 +85,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      # --- INICIO: Setup de Entorno ---
+      # --- INICIO: Setup de Entorno (Manual y Robusto) ---
       - name: Google Cloud Auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
-      - name: Instalar Google Cloud SDK y Plugin GKE
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          components: gke-gcloud-auth-plugin
+      # --- ¡LA CORRECCIÓN! (Reemplazando setup-gcloud@v2) ---
+      - name: Instalar Google Cloud SDK
+        run: |
+          curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+          tar -xzf google-cloud-cli-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${GITHUB_WORKSPACE}/google-cloud-sdk/bin" >> $GITHUB_PATH
+
+      - name: Instalar plugin GKE auth
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+      # --- Fin de la corrección ---
 
       - name: Configurar Docker para GCR (¡CRÍTICO!)
         run: gcloud auth configure-docker gcr.io --quiet
@@ -120,7 +135,6 @@ jobs:
           PULUMI_STACK: dev
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-          # --- ¡LA CORRECCIÓN! ---
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
       - name: Pulumi Deploy
@@ -134,5 +148,4 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-          # --- ¡LA CORRECCIÓN! ---
           USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
