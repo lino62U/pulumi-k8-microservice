@@ -13,6 +13,7 @@ def get_db_connection():
         password=os.environ.get("DB_PASSWORD", "mypassword"),
         database=os.environ.get("DB_NAME", "myapp_db")
     )
+# trigger build
 
 # trigger build
 @app.route('/employees', methods=['GET'])
