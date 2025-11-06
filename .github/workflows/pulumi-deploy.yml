@@ -95,12 +95,10 @@ jobs:
       - name: 6. Ejecutar 'pulumi up' (con auto-aprobación) # (Ahora es el paso 6)
         uses: pulumi/actions@v5
         with:
-          command: up
+          command: up --yes --skip-preview
           stack-name: dev  # <-- CAMBIA ESTO por tu nombre de stack
           work-dir: infra    # <-- CAMBIA ESTO por la carpeta de tu código Pulumi
           refresh: true      # Refresca el estado antes de aplicar
-          # '--yes' es CRÍTICO para que no pida confirmación en el pipeline
-          args: --yes 
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
