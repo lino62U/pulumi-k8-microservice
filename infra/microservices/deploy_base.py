@@ -4,7 +4,10 @@ from pulumi import ResourceOptions, CustomResource
 from pulumi_kubernetes.apps.v1 import Deployment
 from pulumi_kubernetes.core.v1 import Service
 from pulumi_kubernetes.autoscaling.v2 import HorizontalPodAutoscaler
+from pulumi_kubernetes.meta.v1 import ObjectMetaArgs, LabelSelectorArgs
+from pulumi_kubernetes.core.v1 import Service, ServiceSpecArgs, ServicePortArgs, ContainerArgs, PodSpecArgs, PodTemplateSpecArgs, EnvVarArgs
 
+from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
 # Clase de 'Configuración' simple para HPA y VPA para mantener limpio el __init__
 class HpaConfig:
 # ... (código sin cambios) ...
@@ -24,6 +27,7 @@ class VpaConfig:
 
 class MicroserviceDeployer:
     def __init__(self,
+                 *,
                  name: str,
 # ... (código sin cambios) ...
                  image: str,
@@ -51,40 +55,60 @@ class MicroserviceDeployer:
         self.deployment = None
 
     def deploy(self):
-        # 1. Deployment
+
+        # ✅ DEPLOYMENT CORRECTO
         self.deployment = Deployment(
-# ... (código sin cambios) ...
-            f"{self.name}-deployment",
-            spec={
-                "selector": {"matchLabels": self.labels},
-                "replicas": 2, # HPA tomará control de esto
-                "template": {
-                    "metadata": {"labels": self.labels},
-                    "spec": {
-                        "containers": [{
-                            "name": self.name,
-                            "image": self.image,
-                            "ports": [{"containerPort": self.port}],
-                            "env": self.env,
-                            "resources": self.resources, # Se aplica si se define
-                        }]
-                    }
-                },
-            },
+            resource_name=f"{self.name}-deployment",
+            metadata=ObjectMetaArgs(
+                name=self.name,
+                labels=self.labels
+            ),
+            spec=DeploymentSpecArgs(
+                replicas=2,
+                selector=LabelSelectorArgs(
+                    match_labels=self.labels
+                ),
+                template=PodTemplateSpecArgs(
+                    metadata=ObjectMetaArgs(labels=self.labels),
+                    spec=PodSpecArgs(
+                        containers=[
+                            ContainerArgs(
+                                name=self.name,
+                                image=self.image,
+                                ports=[{"containerPort": self.port}],
+                                env=[
+                                    EnvVarArgs(name=e["name"], value=e["value"])
+                                    for e in self.env
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ),
             opts=ResourceOptions(provider=self.provider)
         )
 
-        # 2. Service (LoadBalancer)
+        # ✅ SERVICE CORRECTO
         self.service = Service(
-# ... (código sin cambios) ...
-            f"{self.name}-service",
-            spec={
-                "selector": self.labels,
-                "ports": [{"port": self.port, "targetPort": self.port}],
-                "type": "LoadBalancer"
-            },
-            opts=ResourceOptions(provider=self.provider, depends_on=[self.deployment])
+            resource_name=f"{self.name}-service",
+            metadata=ObjectMetaArgs(
+                name=self.name
+            ),
+            spec=ServiceSpecArgs(
+                selector=self.labels,
+                type="LoadBalancer",
+                ports=[ServicePortArgs(
+                    port=self.port,
+                    target_port=self.port
+                )]
+            ),
+            opts=ResourceOptions(
+                provider=self.provider,
+                depends_on=[self.deployment]
+            )
         )
+
+        return self.service
 
         # 3. Horizontal Pod Autoscaler (HPA)
         if self.hpa_config:

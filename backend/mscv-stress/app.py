@@ -9,7 +9,6 @@ CORS(app)
 
 # trigger build
 
-# trigger build
 @app.route("/heavy_task")
 def heavy_task():
     """Simula una carga de CPU por N segundos."""
