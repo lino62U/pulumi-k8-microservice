@@ -18,8 +18,10 @@ jobs:
     if: github.event_name == 'pull_request'
     
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
 
     steps:
       - name: Checkout Código
